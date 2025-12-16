@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": {
+      "@core/*": ["src/core/*"],
+      "@systems/*": ["src/systems/*"],
+      "@config/*": ["src/config/*"],
+      "@entities/*": ["src/entities/*"],
+      "@scenes/*": ["src/scenes/*"],
+      "@combat/*": ["src/combat/*"],
+      "@effects/*": ["src/effects/*"],
+      "@input/*": ["src/input/*"],
+      "@ai/*": ["src/ai/*"],
+      "@utils/*": ["src/utils/*"]
+    },
+    "types": ["vite/client", "node"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

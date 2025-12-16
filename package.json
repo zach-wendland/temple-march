@@ -1,0 +1,36 @@
+{
+  "name": "temple-march",
+  "version": "3.0.0",
+  "description": "Star Wars themed 2D action game - Temple March (Phaser.js + p5.js)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "keywords": [
+    "game",
+    "phaser",
+    "p5js",
+    "action",
+    "star-wars",
+    "2d"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^25.0.2",
+    "@types/p5": "^1.7.7",
+    "@vitest/coverage-v8": "^4.0.15",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.0",
+    "vitest": "^4.0.15"
+  },
+  "dependencies": {
+    "p5": "^1.11.0",
+    "phaser": "^3.90.0"
+  }
+}

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Temple March - Order 66</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html, body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #000;
+        font-family: Arial, sans-serif;
+      }
+      #game-container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      #effects-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 10;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      #effects-container canvas {
+        position: absolute;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Phaser game canvas container -->
+    <div id="game-container"></div>
+
+    <!-- p5.js effects overlay container -->
+    <div id="effects-container"></div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

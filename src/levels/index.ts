@@ -53,3 +53,36 @@ export type {
   PickupType,
   PickupConfig,
 } from './Pickup';
+
+// Temple Area Configuration
+export {
+  TempleArea,
+  TEMPLE_ENTRANCE_CONFIG,
+  MAIN_HALLS_CONFIG,
+  TRAINING_GROUNDS_CONFIG,
+  ARCHIVES_CONFIG,
+  COUNCIL_CHAMBER_CONFIG,
+  DRALLIG_ARENA_CONFIG,
+  ENTRANCE_WAVES,
+  HALLS_WAVES,
+  TRAINING_WAVES,
+  ARCHIVES_WAVES,
+  getAllAreaConfigs,
+  getAreaConfig,
+  getAreaWaves,
+  getAreaOrder,
+  isBossArea,
+} from './TempleAreaConfig';
+export type {
+  EnemyWave,
+  BossArenaConfig,
+} from './TempleAreaConfig';
+
+// Boss Encounter System
+export {
+  BossEncounter,
+  BossEncounterState,
+} from './BossEncounter';
+export type {
+  BossEncounterEvents,
+} from './BossEncounter';

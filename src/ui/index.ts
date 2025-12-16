@@ -34,3 +34,12 @@ export {
   EnemyHealthBarManager,
   type EnemyType,
 } from './EnemyHealthBar';
+
+// Boss UI
+export {
+  BossHealthBar,
+  createBossHealthBar,
+  createCinDralligHealthBar,
+  type BossConfig,
+  type BossPhase,
+} from './BossHealthBar';

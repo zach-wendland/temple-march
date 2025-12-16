@@ -24,5 +24,14 @@ export { JediDefender, JediAttack } from './JediDefender';
 export { CloneTrooper, CloneAttack, FormationRole } from './CloneTrooper';
 export { TempleGuard, GuardAttack, GuardStance } from './TempleGuard';
 
+// Boss enemies
+export {
+  CinDrallig,
+  DralligPhase,
+  CIN_DRALLIG_CONFIG,
+  createCinDrallig,
+  type FormAttackPattern,
+} from './CinDrallig';
+
 // Object pooling
 export { EnemyPool, EnemyPoolConfig, PoolStats } from './EnemyPool';

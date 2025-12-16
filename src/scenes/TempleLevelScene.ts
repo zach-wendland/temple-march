@@ -8,10 +8,20 @@ import Phaser from 'phaser';
 import { SceneKey, Layer, EntityId } from '../core/types';
 import { GAME_WIDTH, GAME_HEIGHT, PLAYER_CONFIG } from '../config/GameConfig';
 import { EventBus, GameEvent } from '../core/events/EventBus';
+import { initEffectsLayer, EffectsLayer } from '../core/EffectsLayer';
 
 // Combat systems
 import { CombatManager } from '../combat/CombatManager';
 import { Faction, createDefaultStats } from '../combat/DamageCalculator';
+
+// Force Powers & Effects
+import {
+  ForceSystem,
+  ForcePowerType,
+  ForceTarget,
+  ScreenShake,
+  HitStop,
+} from '../force';
 
 // Input
 import { InputManager } from '../input/InputManager';
@@ -69,6 +79,12 @@ export class TempleLevelScene extends Phaser.Scene {
   private combatManager!: CombatManager;
   private levelManager!: LevelManager;
 
+  // Force Powers & Effects Systems
+  private forceSystem!: ForceSystem;
+  private screenShake!: ScreenShake;
+  private hitStop!: HitStop;
+  private effectsLayer!: EffectsLayer;
+
   // Player
   private player!: Player;
 
@@ -120,6 +136,15 @@ export class TempleLevelScene extends Phaser.Scene {
     // Initialize level manager
     this.levelManager = new LevelManager(this, this.eventBus);
 
+    // Initialize Force Powers & Effects Systems
+    this.forceSystem = new ForceSystem(this, this.eventBus, this.combatManager);
+    this.screenShake = new ScreenShake(this, this.eventBus);
+    this.hitStop = new HitStop(this, this.eventBus);
+
+    // Initialize p5.js effects layer
+    this.effectsLayer = initEffectsLayer(GAME_WIDTH, GAME_HEIGHT);
+    this.forceSystem.setEffectsLayer(this.effectsLayer);
+
     // Create entity groups
     this.enemies = this.add.group();
     this.allies = this.add.group();
@@ -163,16 +188,28 @@ export class TempleLevelScene extends Phaser.Scene {
   update(time: number, delta: number): void {
     if (this.isPaused) return;
 
+    // Update hit stop (must be first to apply time scale)
+    this.hitStop.update(delta);
+
     // Update input
     this.inputManager.update();
 
     // Update player
     if (this.player) {
       this.player.update(delta);
+
+      // Handle Force power input
+      this.handleForcePowerInput();
     }
 
     // Update combat manager
     this.combatManager.update(delta);
+
+    // Update Force system (for sustained powers)
+    this.forceSystem.update(delta);
+
+    // Update screen shake
+    this.screenShake.update(delta);
 
     // Update enemies
     for (const enemy of this.activeEnemies.values()) {
@@ -201,6 +238,101 @@ export class TempleLevelScene extends Phaser.Scene {
 
     // Update UI
     this.updateUI();
+  }
+
+  /**
+   * Handle Force power input from player.
+   */
+  private handleForcePowerInput(): void {
+    if (!this.player) return;
+
+    const inputState = this.inputManager.getState();
+    const playerPos = this.player.getPosition();
+    const direction = this.player.isFacingRight() ? 0 : Math.PI;
+    const currentForce = this.player.getForce();
+
+    // Get targets for Force powers
+    const targets = this.getForceTargets();
+
+    // Force Push (F key)
+    if (inputState.forcePush && this.inputManager.justPressed('forcePush')) {
+      const result = this.forceSystem.executeForcePush(
+        this.player.id,
+        playerPos,
+        direction,
+        targets,
+        currentForce
+      );
+
+      if (result.success) {
+        // Deduct Force from player (handled via event)
+        this.eventBus.emit({
+          type: 'player:force_consumed',
+          data: { amount: result.forceCost },
+        });
+      }
+    }
+
+    // Force Pull (G key)
+    if (inputState.forcePull && this.inputManager.justPressed('forcePull')) {
+      const result = this.forceSystem.executeForcePull(
+        this.player.id,
+        playerPos,
+        direction,
+        targets,
+        currentForce
+      );
+
+      if (result.success) {
+        this.eventBus.emit({
+          type: 'player:force_consumed',
+          data: { amount: result.forceCost },
+        });
+      }
+    }
+
+    // Force Lightning (Hold special + Force button combo - or we can add a dedicated key)
+    // For now, let's trigger it with special + forcePush
+    if (inputState.special && inputState.forcePush && this.inputManager.justPressed('special')) {
+      const result = this.forceSystem.executeForceLightning(
+        this.player.id,
+        playerPos,
+        direction,
+        targets,
+        currentForce
+      );
+
+      if (result.success) {
+        this.eventBus.emit({
+          type: 'player:force_consumed',
+          data: { amount: result.forceCost },
+        });
+      }
+    }
+  }
+
+  /**
+   * Get valid Force power targets from active enemies.
+   */
+  private getForceTargets(): ForceTarget[] {
+    const targets: ForceTarget[] = [];
+
+    for (const enemy of this.activeEnemies.values()) {
+      if (!enemy.isAlive()) continue;
+
+      const stats = this.combatManager.getEntityStats(enemy.id);
+      const pos = enemy.getPosition();
+
+      targets.push({
+        id: enemy.id,
+        sprite: enemy.getSprite(),
+        position: pos,
+        health: stats?.health ?? enemy.getHealth(),
+        isBlocking: enemy.getCurrentState() === 'block',
+      });
+    }
+
+    return targets;
   }
 
   // ==========================================================================
@@ -690,7 +822,7 @@ export class TempleLevelScene extends Phaser.Scene {
       }
 
       // Apply hit feedback
-      this.hitFeedback.applyHitFeedback(data.hitType);
+      this.hitFeedback.applyHitFeedback(data.hitType as 'light' | 'heavy' | 'critical' | 'kill' | 'force');
     });
 
     // Enemy death
@@ -736,6 +868,70 @@ export class TempleLevelScene extends Phaser.Scene {
       if (this.player) {
         this.player.getSprite().setPosition(data.position.x, data.position.y);
         this.player.heal(this.player.getMaxHealth());
+      }
+    });
+
+    // Force power consumption
+    this.eventBus.on('player:force_consumed', (event) => {
+      const data = event.data as { amount: number };
+      if (this.player) {
+        this.player.consumeForce(data.amount);
+      }
+    });
+
+    // Force power used - spawn additional visual effects
+    this.eventBus.on('force:power_used', (event) => {
+      const data = event.data as {
+        powerType: ForcePowerType;
+        position: { x: number; y: number };
+        direction: number;
+        targetsHit: EntityId[];
+      };
+
+      // Spawn additional p5.js effects based on power type
+      if (this.effectsLayer) {
+        switch (data.powerType) {
+          case ForcePowerType.Push:
+            this.effectsLayer.spawnForcePushCone(
+              data.position,
+              data.direction,
+              250,
+              60,
+              { r: 80, g: 80, b: 200 }
+            );
+            break;
+          case ForcePowerType.Pull:
+            this.effectsLayer.spawnForcePullVortex(
+              data.position,
+              200,
+              { r: 150, g: 50, b: 180 }
+            );
+            break;
+          case ForcePowerType.Lightning:
+            // Lightning effects are already spawned in ForceSystem
+            // Add dark side aura around Vader
+            this.effectsLayer.spawnDarkSideAura(
+              data.position,
+              50,
+              { r: 30, g: 0, b: 80 },
+              800
+            );
+            break;
+        }
+      }
+
+      // Spawn impact sparks at each target hit
+      for (const targetId of data.targetsHit) {
+        const enemy = this.activeEnemies.get(targetId);
+        if (enemy && this.effectsLayer) {
+          const enemyPos = enemy.getPosition();
+          this.effectsLayer.spawnImpactSparks(
+            enemyPos,
+            { r: 100, g: 100, b: 255 },
+            6,
+            15
+          );
+        }
       }
     });
   }
@@ -990,5 +1186,19 @@ export class TempleLevelScene extends Phaser.Scene {
   shutdown(): void {
     this.clearEntities();
     this.levelManager.destroy();
+
+    // Cleanup Force Power & Effects systems
+    if (this.forceSystem) {
+      this.forceSystem.destroy();
+    }
+    if (this.screenShake) {
+      this.screenShake.destroy();
+    }
+    if (this.hitStop) {
+      this.hitStop.destroy();
+    }
+    if (this.effectsLayer) {
+      this.effectsLayer.destroy();
+    }
   }
 }

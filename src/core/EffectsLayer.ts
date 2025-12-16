@@ -15,6 +15,10 @@ export enum EffectType {
   ForceWave = 'force_wave',
   ScreenShake = 'screen_shake',
   HitFlash = 'hit_flash',
+  ForcePushCone = 'force_push_cone',
+  ForcePullVortex = 'force_pull_vortex',
+  DarkSideAura = 'dark_side_aura',
+  ImpactSpark = 'impact_spark',
 }
 
 /** Base effect interface */
@@ -48,6 +52,36 @@ export interface ForceWaveData {
   maxRadius: number;
   color: { r: number; g: number; b: number };
   rings: number;
+}
+
+/** Force push cone effect data */
+export interface ForcePushConeData {
+  direction: number;
+  coneAngle: number;
+  range: number;
+  color: { r: number; g: number; b: number };
+}
+
+/** Force pull vortex effect data */
+export interface ForcePullVortexData {
+  color: { r: number; g: number; b: number };
+  radius: number;
+  spirals: number;
+}
+
+/** Dark side aura effect data */
+export interface DarkSideAuraData {
+  color: { r: number; g: number; b: number };
+  radius: number;
+  pulseRate: number;
+}
+
+/** Impact spark effect data */
+export interface ImpactSparkData {
+  color: { r: number; g: number; b: number };
+  sparkCount: number;
+  sparkLength: number;
+  spread: number;
 }
 
 /**
@@ -184,6 +218,100 @@ export class EffectsLayer {
   }
 
   /**
+   * Spawns a Force Push cone effect - dark side visual.
+   */
+  spawnForcePushCone(
+    origin: Vector2,
+    direction: number,
+    range: number = 250,
+    coneAngle: number = 60,
+    color: { r: number; g: number; b: number } = { r: 80, g: 80, b: 200 },
+    duration: number = 350
+  ): string {
+    const id = this.generateId();
+    const effect: Effect = {
+      id,
+      type: EffectType.ForcePushCone,
+      position: origin,
+      startTime: Date.now(),
+      duration,
+      data: { direction, coneAngle, range, color } as ForcePushConeData,
+    };
+    this.effects.set(id, effect);
+    return id;
+  }
+
+  /**
+   * Spawns a Force Pull vortex effect - pulling visual.
+   */
+  spawnForcePullVortex(
+    center: Vector2,
+    radius: number = 200,
+    color: { r: number; g: number; b: number } = { r: 150, g: 50, b: 180 },
+    duration: number = 400,
+    spirals: number = 4
+  ): string {
+    const id = this.generateId();
+    const effect: Effect = {
+      id,
+      type: EffectType.ForcePullVortex,
+      position: center,
+      startTime: Date.now(),
+      duration,
+      data: { color, radius, spirals } as ForcePullVortexData,
+    };
+    this.effects.set(id, effect);
+    return id;
+  }
+
+  /**
+   * Spawns a dark side aura around Vader.
+   */
+  spawnDarkSideAura(
+    center: Vector2,
+    radius: number = 40,
+    color: { r: number; g: number; b: number } = { r: 30, g: 0, b: 60 },
+    duration: number = 500,
+    pulseRate: number = 200
+  ): string {
+    const id = this.generateId();
+    const effect: Effect = {
+      id,
+      type: EffectType.DarkSideAura,
+      position: center,
+      startTime: Date.now(),
+      duration,
+      data: { color, radius, pulseRate } as DarkSideAuraData,
+    };
+    this.effects.set(id, effect);
+    return id;
+  }
+
+  /**
+   * Spawns impact sparks on hit.
+   */
+  spawnImpactSparks(
+    position: Vector2,
+    color: { r: number; g: number; b: number } = { r: 255, g: 200, b: 100 },
+    sparkCount: number = 8,
+    sparkLength: number = 20,
+    spread: number = Math.PI * 2,
+    duration: number = 200
+  ): string {
+    const id = this.generateId();
+    const effect: Effect = {
+      id,
+      type: EffectType.ImpactSpark,
+      position,
+      startTime: Date.now(),
+      duration,
+      data: { color, sparkCount, sparkLength, spread } as ImpactSparkData,
+    };
+    this.effects.set(id, effect);
+    return id;
+  }
+
+  /**
    * Removes an effect by ID.
    */
   removeEffect(id: string): void {
@@ -222,6 +350,18 @@ export class EffectsLayer {
           break;
         case EffectType.ForceWave:
           this.renderForceWave(p, effect, progress);
+          break;
+        case EffectType.ForcePushCone:
+          this.renderForcePushCone(p, effect, progress);
+          break;
+        case EffectType.ForcePullVortex:
+          this.renderForcePullVortex(p, effect, progress);
+          break;
+        case EffectType.DarkSideAura:
+          this.renderDarkSideAura(p, effect, progress);
+          break;
+        case EffectType.ImpactSpark:
+          this.renderImpactSparks(p, effect, progress);
           break;
       }
     }
@@ -369,6 +509,195 @@ export class EffectsLayer {
         p.stroke(color.r, color.g, color.b, alpha);
         p.ellipse(position.x, position.y, radius * 2, radius * 2);
       }
+    }
+  }
+
+  /**
+   * Renders Force Push cone effect.
+   */
+  private renderForcePushCone(p: p5, effect: Effect, progress: number): void {
+    const data = effect.data as ForcePushConeData;
+    const { direction, coneAngle, range, color } = data;
+    const { position } = effect;
+
+    const easedProgress = this.easeOutQuad(progress);
+    const alpha = (1 - progress) * 180;
+    const currentRange = easedProgress * range;
+
+    // Convert cone angle to radians
+    const halfAngle = (coneAngle * Math.PI) / 180 / 2;
+
+    // Draw multiple cone layers for depth
+    for (let layer = 0; layer < 3; layer++) {
+      const layerAlpha = alpha * (0.5 - layer * 0.15);
+      const layerRange = currentRange * (1 - layer * 0.1);
+
+      p.fill(color.r, color.g, color.b, layerAlpha);
+      p.noStroke();
+
+      // Draw cone as a triangle fan with arc
+      p.beginShape();
+      p.vertex(position.x, position.y);
+
+      const segments = 12;
+      for (let i = 0; i <= segments; i++) {
+        const angle = direction - halfAngle + (i / segments) * halfAngle * 2;
+        const x = position.x + Math.cos(angle) * layerRange;
+        const y = position.y + Math.sin(angle) * layerRange;
+        p.vertex(x, y);
+      }
+
+      p.endShape(p.CLOSE);
+    }
+
+    // Add distortion lines
+    p.stroke(255, 255, 255, alpha * 0.5);
+    p.strokeWeight(2);
+    for (let i = 0; i < 5; i++) {
+      const lineProgress = (progress + i * 0.15) % 1;
+      const lineRange = lineProgress * range;
+      const angle = direction + (Math.random() - 0.5) * halfAngle;
+      const startX = position.x + Math.cos(angle) * lineRange * 0.3;
+      const startY = position.y + Math.sin(angle) * lineRange * 0.3;
+      const endX = position.x + Math.cos(angle) * lineRange;
+      const endY = position.y + Math.sin(angle) * lineRange;
+      p.line(startX, startY, endX, endY);
+    }
+  }
+
+  /**
+   * Renders Force Pull vortex effect.
+   */
+  private renderForcePullVortex(p: p5, effect: Effect, progress: number): void {
+    const data = effect.data as ForcePullVortexData;
+    const { color, radius, spirals } = data;
+    const { position } = effect;
+
+    const alpha = (1 - progress) * 200;
+    const rotation = progress * Math.PI * 4; // Spin effect
+
+    // Draw spiraling lines toward center
+    p.stroke(color.r, color.g, color.b, alpha);
+    p.strokeWeight(2);
+    p.noFill();
+
+    for (let s = 0; s < spirals; s++) {
+      const baseAngle = (s / spirals) * Math.PI * 2 + rotation;
+
+      p.beginShape();
+      for (let i = 0; i <= 20; i++) {
+        const t = i / 20;
+        const spiralProgress = (1 - progress) * t + progress; // Collapse inward
+        const r = radius * spiralProgress * (1 - t * 0.8);
+        const angle = baseAngle + t * Math.PI * 2;
+        const x = position.x + Math.cos(angle) * r;
+        const y = position.y + Math.sin(angle) * r;
+        p.vertex(x, y);
+      }
+      p.endShape();
+    }
+
+    // Center glow
+    const glowSize = radius * 0.3 * (1 - progress);
+    for (let i = 3; i > 0; i--) {
+      p.fill(color.r, color.g, color.b, alpha * 0.2 * i);
+      p.noStroke();
+      p.ellipse(position.x, position.y, glowSize * i, glowSize * i);
+    }
+  }
+
+  /**
+   * Renders dark side aura effect.
+   */
+  private renderDarkSideAura(p: p5, effect: Effect, progress: number): void {
+    const data = effect.data as DarkSideAuraData;
+    const { color, radius, pulseRate } = data;
+    const { position } = effect;
+
+    const alpha = (1 - progress) * 150;
+    const pulse = Math.sin((Date.now() / pulseRate) * Math.PI) * 0.3 + 0.7;
+    const currentRadius = radius * pulse;
+
+    // Multiple layers for depth
+    for (let layer = 4; layer > 0; layer--) {
+      const layerRadius = currentRadius * (1 + layer * 0.2);
+      const layerAlpha = alpha * (0.3 / layer);
+
+      // Gradient fill with noise-based distortion
+      p.noStroke();
+      p.fill(color.r, color.g, color.b, layerAlpha);
+
+      p.beginShape();
+      const segments = 24;
+      for (let i = 0; i < segments; i++) {
+        const angle = (i / segments) * Math.PI * 2;
+        const noise = p.noise(
+          Math.cos(angle) * 0.5 + p.frameCount * 0.02,
+          Math.sin(angle) * 0.5
+        );
+        const r = layerRadius * (0.8 + noise * 0.4);
+        p.vertex(
+          position.x + Math.cos(angle) * r,
+          position.y + Math.sin(angle) * r
+        );
+      }
+      p.endShape(p.CLOSE);
+    }
+
+    // Dark tendrils
+    p.stroke(color.r * 0.5, color.g * 0.5, color.b * 0.5, alpha * 0.5);
+    p.strokeWeight(1);
+    for (let i = 0; i < 6; i++) {
+      const angle = (i / 6) * Math.PI * 2 + p.frameCount * 0.01;
+      const length = currentRadius * 1.5;
+      const endX = position.x + Math.cos(angle) * length;
+      const endY = position.y + Math.sin(angle) * length;
+      p.line(position.x, position.y, endX, endY);
+    }
+  }
+
+  /**
+   * Renders impact sparks effect.
+   */
+  private renderImpactSparks(p: p5, effect: Effect, progress: number): void {
+    const data = effect.data as ImpactSparkData;
+    const { color, sparkCount, sparkLength, spread } = data;
+    const { position } = effect;
+
+    const alpha = (1 - progress) * 255;
+    const expansion = this.easeOutQuad(progress);
+
+    for (let i = 0; i < sparkCount; i++) {
+      const angle = (i / sparkCount) * spread - spread / 2;
+      const sparkProgress = expansion * (0.8 + Math.random() * 0.4);
+      const length = sparkLength * sparkProgress;
+
+      // Spark line
+      const startDist = length * 0.3;
+      const endDist = length;
+
+      const startX = position.x + Math.cos(angle) * startDist;
+      const startY = position.y + Math.sin(angle) * startDist;
+      const endX = position.x + Math.cos(angle) * endDist;
+      const endY = position.y + Math.sin(angle) * endDist;
+
+      // Glow
+      p.stroke(color.r, color.g, color.b, alpha * 0.3);
+      p.strokeWeight(4);
+      p.line(startX, startY, endX, endY);
+
+      // Core
+      p.stroke(255, 255, 255, alpha);
+      p.strokeWeight(2);
+      p.line(startX, startY, endX, endY);
+    }
+
+    // Central flash
+    if (progress < 0.3) {
+      const flashAlpha = (1 - progress / 0.3) * 200;
+      p.fill(255, 255, 255, flashAlpha);
+      p.noStroke();
+      p.ellipse(position.x, position.y, 10 * (1 - progress), 10 * (1 - progress));
     }
   }
 

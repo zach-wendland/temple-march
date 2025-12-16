@@ -221,6 +221,24 @@ export class Player {
   }
 
   /**
+   * Consume Force.
+   */
+  consumeForce(amount: number): boolean {
+    if (this.force >= amount) {
+      this.force -= amount;
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Restore Force.
+   */
+  restoreForce(amount: number): void {
+    this.force = Math.min(this.maxForce, this.force + amount);
+  }
+
+  /**
    * Setup state machine with all states and transitions.
    */
   private setupStateMachine(): void {

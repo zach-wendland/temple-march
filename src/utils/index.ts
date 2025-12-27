@@ -3,6 +3,8 @@
  * Common helpers for the Temple March game.
  */
 
+export { Logger, LogLevel } from './Logger';
+
 /**
  * Clamps a value between min and max.
  */

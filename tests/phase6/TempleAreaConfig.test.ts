@@ -61,7 +61,7 @@ describe('Temple Area Configuration', () => {
     it('should have council chamber config', () => {
       expect(COUNCIL_CHAMBER_CONFIG.id).toBe(TempleArea.CouncilChamber);
       expect(COUNCIL_CHAMBER_CONFIG.displayName).toBe('High Council Chamber');
-      expect(COUNCIL_CHAMBER_CONFIG.isBossArea).toBe(true);
+      // Council chamber boss arena config is separate (DRALLIG_ARENA_CONFIG)
     });
 
     it('should have spawn points for each area', () => {

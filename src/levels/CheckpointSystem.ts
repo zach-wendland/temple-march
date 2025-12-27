@@ -4,6 +4,7 @@
  */
 
 import { EventBus, GameEvent } from '../core/events/EventBus';
+import { Logger } from '../utils/Logger';
 
 /**
  * Level state snapshot for checkpoint.
@@ -263,7 +264,7 @@ export class CheckpointSystem {
 
       localStorage.setItem(this.config.storageKey, JSON.stringify(data));
     } catch (error) {
-      console.error('Failed to save checkpoints to storage:', error);
+      Logger.error('Failed to save checkpoints to storage:', error);
     }
   }
 
@@ -295,7 +296,7 @@ export class CheckpointSystem {
         this.lastCheckpoint = this.checkpoints.get(data.lastCheckpointId) || null;
       }
     } catch (error) {
-      console.error('Failed to load checkpoints from storage:', error);
+      Logger.error('Failed to load checkpoints from storage:', error);
       // Clear corrupted data
       this.clearStorage();
     }
@@ -308,7 +309,7 @@ export class CheckpointSystem {
     try {
       localStorage.removeItem(this.config.storageKey);
     } catch (error) {
-      console.error('Failed to clear checkpoint storage:', error);
+      Logger.error('Failed to clear checkpoint storage:', error);
     }
   }
 
@@ -355,7 +356,7 @@ export class CheckpointSystem {
 
       return true;
     } catch (error) {
-      console.error('Failed to import checkpoints:', error);
+      Logger.error('Failed to import checkpoints:', error);
       return false;
     }
   }

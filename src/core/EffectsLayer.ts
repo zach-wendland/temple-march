@@ -7,6 +7,7 @@
 
 import p5 from 'p5';
 import { Vector2 } from './types';
+import { Logger } from '../utils/Logger';
 
 /** Effect types available */
 export enum EffectType {
@@ -106,7 +107,7 @@ export class EffectsLayer {
   init(): void {
     const container = document.getElementById('effects-container');
     if (!container) {
-      console.error('Effects container not found');
+      Logger.error('Effects container not found');
       return;
     }
 

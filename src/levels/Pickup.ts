@@ -112,8 +112,8 @@ export class Pickup extends InteractiveObject {
   private originalY: number;
   private bobPhase: number = 0;
 
-  // Target for magnetization
-  private magnetTarget: Phaser.GameObjects.GameObject | null = null;
+  // Target for magnetization (must have x/y position)
+  private magnetTarget: (Phaser.GameObjects.GameObject & { x: number; y: number }) | null = null;
 
   // Visual elements
   private glowEffect: Phaser.GameObjects.Graphics | null = null;
@@ -181,7 +181,7 @@ export class Pickup extends InteractiveObject {
   /**
    * Set the magnet target (usually the player).
    */
-  setMagnetTarget(target: Phaser.GameObjects.GameObject | null): void {
+  setMagnetTarget(target: (Phaser.GameObjects.GameObject & { x: number; y: number }) | null): void {
     this.magnetTarget = target;
   }
 
@@ -189,7 +189,7 @@ export class Pickup extends InteractiveObject {
    * Try to collect the pickup if in range.
    * Returns true if collected.
    */
-  tryCollect(collector: Phaser.GameObjects.GameObject, collectorId: EntityId): boolean {
+  tryCollect(collector: Phaser.GameObjects.GameObject & { x: number; y: number }, collectorId: EntityId): boolean {
     if (this.isCollected || !this.isActive) {
       return false;
     }

@@ -8,6 +8,7 @@ import { SceneKey } from '../core/types';
 import { EventBus, GameEvent } from '../core/events/EventBus';
 import { TilemapManager, TilemapLoadResult } from './TilemapManager';
 import { CheckpointSystem, CheckpointData } from './CheckpointSystem';
+import { Logger } from '../utils/Logger';
 
 /**
  * Area configuration for a temple level area.
@@ -182,7 +183,7 @@ export class LevelManager {
     const areaConfig = TEMPLE_AREAS[areaKey];
 
     if (!areaConfig) {
-      console.error(`Unknown area: ${areaKey}`);
+      Logger.error(`Unknown area: ${areaKey}`);
       return false;
     }
 
@@ -194,7 +195,7 @@ export class LevelManager {
     );
 
     if (!result.success) {
-      console.error(`Failed to load area ${areaKey}: ${result.error}`);
+      Logger.error(`Failed to load area ${areaKey}: ${result.error}`);
       return false;
     }
 
@@ -231,7 +232,7 @@ export class LevelManager {
     transition: TransitionConfig = this.transitionConfig
   ): Promise<boolean> {
     if (this.isTransitioning) {
-      console.warn('Transition already in progress');
+      Logger.warn('Transition already in progress');
       return false;
     }
 
@@ -512,7 +513,7 @@ export class LevelManager {
       const stateJson = JSON.stringify(this.levelState);
       localStorage.setItem('temple_march_level_state', stateJson);
     } catch (error) {
-      console.error('Failed to save level state:', error);
+      Logger.error('Failed to save level state:', error);
     }
   }
 
@@ -527,7 +528,7 @@ export class LevelManager {
         return true;
       }
     } catch (error) {
-      console.error('Failed to load level state:', error);
+      Logger.error('Failed to load level state:', error);
     }
     return false;
   }

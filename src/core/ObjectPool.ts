@@ -5,6 +5,8 @@
  * "Efficiency is the dark side's weapon - waste nothing."
  */
 
+import { Logger } from '../utils/Logger';
+
 /**
  * Poolable object interface.
  */
@@ -91,7 +93,7 @@ export class ObjectPool<T extends Poolable> {
    */
   release(obj: T): void {
     if (!this.active.has(obj)) {
-      console.warn('Attempted to release object not from this pool');
+      Logger.warn('Attempted to release object not from this pool');
       return;
     }
 

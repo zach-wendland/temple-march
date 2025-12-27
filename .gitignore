@@ -31,3 +31,6 @@ coverage/
 
 # Vite cache
 .vite/
+
+.vercel
+nul

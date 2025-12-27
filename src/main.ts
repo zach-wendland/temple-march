@@ -11,6 +11,7 @@ import { BootScene } from './scenes/BootScene';
 import { MainMenuScene } from './scenes/MainMenuScene';
 import { GameScene } from './scenes/GameScene';
 import { initEffectsLayer } from './core/EffectsLayer';
+import { Logger } from './utils/Logger';
 
 // Register all scenes
 const scenes = [BootScene, MainMenuScene, GameScene];
@@ -32,9 +33,9 @@ function initGame(): void {
   // Expose game instance for debugging (dev only)
   if (import.meta.env.DEV) {
     (window as unknown as { game: Phaser.Game }).game = game;
-    console.log('🎮 Temple March v3.0.0 - Development Mode');
-    console.log('📦 Phaser.js + p5.js Architecture');
-    console.log('🎯 Access game instance: window.game');
+    Logger.info('🎮 Temple March v3.0.0 - Development Mode');
+    Logger.info('📦 Phaser.js + p5.js Architecture');
+    Logger.info('🎯 Access game instance: window.game');
   }
 }
 

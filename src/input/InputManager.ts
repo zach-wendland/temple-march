@@ -6,6 +6,7 @@
 import Phaser from 'phaser';
 import { InputMappings, DEFAULT_KEYBOARD_MAPPINGS, InputAction, DirectionInput } from './InputMappings';
 import { ComboInput } from '../combat/ComboSystem';
+import { Logger } from '../utils/Logger';
 
 /**
  * Input state snapshot.
@@ -243,12 +244,12 @@ export class InputManager {
   private setupGamepad(): void {
     this.scene.input.gamepad?.on('connected', (pad: Phaser.Input.Gamepad.Gamepad) => {
       this.gamepad = pad;
-      console.log('Gamepad connected:', pad.id);
+      Logger.info('Gamepad connected:', pad.id);
     });
 
     this.scene.input.gamepad?.on('disconnected', () => {
       this.gamepad = null;
-      console.log('Gamepad disconnected');
+      Logger.info('Gamepad disconnected');
     });
 
     // Check for already connected gamepad

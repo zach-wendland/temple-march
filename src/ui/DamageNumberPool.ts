@@ -10,6 +10,7 @@ import {
   TYPOGRAPHY,
   getDamageSize,
 } from './CombatUIConfig';
+import { Logger } from '../utils/Logger';
 
 export type DamageType = 'normal' | 'critical' | 'force' | 'blocked';
 
@@ -62,7 +63,7 @@ export class DamageNumberPool {
     // Find inactive pooled object
     const pooledObj = this.pool.find((obj) => !obj.active);
     if (!pooledObj) {
-      console.warn('DamageNumberPool exhausted');
+      Logger.warn('DamageNumberPool exhausted');
       return;
     }
 

@@ -12,6 +12,7 @@ import { TempleGuard } from './TempleGuard';
 import { CombatManager } from '../../combat/CombatManager';
 import { EventBus } from '../../core/events/EventBus';
 import { EntityId } from '../../core/types';
+import { Logger } from '../../utils/Logger';
 
 /**
  * Pool configuration.
@@ -113,7 +114,7 @@ export class EnemyPool {
     const maxExpansion = Math.min(count, this.config.maxSize - currentSize);
 
     if (maxExpansion <= 0) {
-      console.warn(`Enemy pool for ${type} at maximum capacity (${this.config.maxSize})`);
+      Logger.warn(`Enemy pool for ${type} at maximum capacity (${this.config.maxSize})`);
       return;
     }
 
@@ -169,7 +170,7 @@ export class EnemyPool {
   spawn(type: EnemyType, x: number, y: number): BaseEnemy | null {
     const pool = this.pools.get(type);
     if (!pool) {
-      console.error(`No pool for enemy type: ${type}`);
+      Logger.error(`No pool for enemy type: ${type}`);
       return null;
     }
 
@@ -185,7 +186,7 @@ export class EnemyPool {
     }
 
     if (!enemy) {
-      console.warn(`Cannot spawn ${type}: pool exhausted and at max capacity`);
+      Logger.warn(`Cannot spawn ${type}: pool exhausted and at max capacity`);
       return null;
     }
 
@@ -234,7 +235,7 @@ export class EnemyPool {
    */
   recycle(enemy: BaseEnemy): void {
     if (!this.activeEnemies.has(enemy.id)) {
-      console.warn(`Attempting to recycle enemy ${enemy.id} that is not active`);
+      Logger.warn(`Attempting to recycle enemy ${enemy.id} that is not active`);
       return;
     }
 
@@ -242,7 +243,7 @@ export class EnemyPool {
     const pool = this.pools.get(type);
 
     if (!pool) {
-      console.error(`No pool for enemy type: ${type}`);
+      Logger.error(`No pool for enemy type: ${type}`);
       enemy.destroy();
       return;
     }

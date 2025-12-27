@@ -13,8 +13,34 @@
  * Breach, Systematic Purge, Beacon Manipulation, Completion"
  */
 
-import { AreaConfig } from './LevelManager';
 import { EnemyType } from '../entities/enemies/EnemyTypes';
+
+/**
+ * Extended area configuration for temple levels.
+ * Includes all gameplay-specific configuration beyond base AreaConfig.
+ */
+export interface TempleAreaConfig {
+  id: string;
+  displayName: string;
+  tilemapKey: string;
+  tilesetKey: string;
+  width: number;
+  height: number;
+  spawnPoints: Record<string, { x: number; y: number }>;
+  transitions: Array<{
+    targetArea: string;
+    triggerZone: { x: number; y: number; width: number; height: number };
+    targetSpawn: string;
+  }>;
+  checkpoints: Array<{
+    id: string;
+    position: { x: number; y: number };
+    name: string;
+  }>;
+  musicTrack?: string;
+  ambientSounds?: string[];
+  bossArena?: BossArenaConfig;
+}
 
 /**
  * Temple area identifiers.
@@ -72,7 +98,7 @@ export interface BossArenaConfig {
  * Temple Entrance configuration.
  * The March begins here - Vader leads the 501st through the Temple gates.
  */
-export const TEMPLE_ENTRANCE_CONFIG: AreaConfig = {
+export const TEMPLE_ENTRANCE_CONFIG: TempleAreaConfig = {
   id: TempleArea.Entrance,
   displayName: 'Temple Entrance',
   tilemapKey: 'temple_entrance_map',
@@ -110,7 +136,7 @@ export const TEMPLE_ENTRANCE_CONFIG: AreaConfig = {
  * Main Halls configuration.
  * Wide corridors with Clone Trooper squads.
  */
-export const MAIN_HALLS_CONFIG: AreaConfig = {
+export const MAIN_HALLS_CONFIG: TempleAreaConfig = {
   id: TempleArea.MainHalls,
   displayName: 'Main Halls',
   tilemapKey: 'temple_halls_map',
@@ -154,7 +180,7 @@ export const MAIN_HALLS_CONFIG: AreaConfig = {
  * Training Grounds configuration.
  * Jedi Defenders make their stand here.
  */
-export const TRAINING_GROUNDS_CONFIG: AreaConfig = {
+export const TRAINING_GROUNDS_CONFIG: TempleAreaConfig = {
   id: TempleArea.TrainingGrounds,
   displayName: 'Training Grounds',
   tilemapKey: 'training_grounds_map',
@@ -198,7 +224,7 @@ export const TRAINING_GROUNDS_CONFIG: AreaConfig = {
  * Archives configuration.
  * Narrow corridors with towering shelves.
  */
-export const ARCHIVES_CONFIG: AreaConfig = {
+export const ARCHIVES_CONFIG: TempleAreaConfig = {
   id: TempleArea.Archives,
   displayName: 'Jedi Archives',
   tilemapKey: 'archives_map',
@@ -247,7 +273,7 @@ export const ARCHIVES_CONFIG: AreaConfig = {
  * Council Chamber configuration.
  * Final boss arena - Cin Drallig awaits.
  */
-export const COUNCIL_CHAMBER_CONFIG: AreaConfig = {
+export const COUNCIL_CHAMBER_CONFIG: TempleAreaConfig = {
   id: TempleArea.CouncilChamber,
   displayName: 'High Council Chamber',
   tilemapKey: 'council_chamber_map',
@@ -274,7 +300,6 @@ export const COUNCIL_CHAMBER_CONFIG: AreaConfig = {
   ],
   musicTrack: 'boss_theme',
   ambientSounds: ['wind', 'coruscant_traffic'],
-  isBossArea: true,
 };
 
 /**
@@ -492,7 +517,7 @@ export const ARCHIVES_WAVES: EnemyWave[] = [
 /**
  * Get all area configurations.
  */
-export function getAllAreaConfigs(): AreaConfig[] {
+export function getAllAreaConfigs(): TempleAreaConfig[] {
   return [
     TEMPLE_ENTRANCE_CONFIG,
     MAIN_HALLS_CONFIG,
@@ -505,7 +530,7 @@ export function getAllAreaConfigs(): AreaConfig[] {
 /**
  * Get area config by ID.
  */
-export function getAreaConfig(areaId: string): AreaConfig | undefined {
+export function getAreaConfig(areaId: string): TempleAreaConfig | undefined {
   return getAllAreaConfigs().find((config) => config.id === areaId);
 }
 
